@@ -3,17 +3,13 @@ package com.module.process.user;
 import com.module.core.annotation.JwtAuth;
 import com.module.core.jwt.JwtDto;
 import com.module.core.jwt.JwtProvider;
-import com.module.core.jwt.JwtTokenDto;
+import com.module.db.entity.user.TbUser;
 import com.module.domain.user.model.TbUserDto;
 import com.module.domain.user.rest.UserRest;
 import com.module.process.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 @RequestMapping("/v1/user")
 @RestController
@@ -27,19 +23,29 @@ public class UserProcess implements UserRest {
     JwtProvider jwtProvider;
 
     @Override
-    @GetMapping
+    public JwtDto emailLogin(@RequestBody TbUserDto userDto) {
+        TbUser tbUser = userService.emailLogin(userDto);
+        return jwtProvider.generateJwt("userId", tbUser.getId());
+    }
+
+    @Override
     @JwtAuth
-    public Long findUser(Long userId) {
-        System.out.println("userId : " + userId);
-        return userService.findByUserId(userId).getUserId();
+    public JwtDto jwtLogin(Long userId) {
+        TbUser tbUser = userService.findById(userId);
+        return jwtProvider.generateJwt("userId", tbUser.getId());
     }
 
     @Override
     public JwtDto signup(@RequestBody TbUserDto tbUserDto) {
+        TbUser tbUser = userService.signup(tbUserDto);
+        return jwtProvider.generateJwt("userId", tbUser.getId());
+    }
 
-        Long userId = userService.signup(tbUserDto);
-        JwtDto jwtDto = jwtProvider.generateJwt("userId", userId);
-
-        return jwtDto;
+    @Override
+    @JwtAuth
+    public TbUserDto findUser(Long userId) {
+        System.out.println("userId : " + userId);
+        TbUser tbUser = userService.findById(userId);
+        return userService.of(tbUser);
     }
 }

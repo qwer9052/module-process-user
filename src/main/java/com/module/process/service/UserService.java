@@ -2,17 +2,14 @@ package com.module.process.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.module.core.exception.CommonException;
-import com.module.domain.user.entity.TbUser;
-import com.module.domain.user.entityrepo.EUserRepo;
+import com.module.core.util.StringUtil;
+import com.module.db.entity.user.TbUser;
 import com.module.domain.user.model.TbUserDto;
 import com.module.domain.user.repo.UserRepo;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -22,18 +19,37 @@ public class UserService {
     @Autowired
     UserRepo userRepo;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    ObjectMapper mapper;
 
-    public TbUserDto findByUserId(Long userId) throws CommonException {
-        TbUser tbUser = userRepo.findByUserId(userId).orElseThrow(() -> new CommonException("존재하지 않는 회원 pk입니다."));
+
+    public TbUserDto of(TbUser tbUser){
         return mapper.convertValue(tbUser, TbUserDto.class);
     }
 
-    public Long signup(TbUserDto tbUserDto) {
+    public TbUser findById(Long userId) throws CommonException {
+        return userRepo.findById(userId).orElseThrow(() -> new CommonException("존재하지 않는 회원 pk입니다."));
+        //return mapper.convertValue(tbUser, TbUserDto.class);
+    }
+
+    public TbUser emailLogin(TbUserDto tbUserDto) {
+        tbUserDto.setPwd(StringUtil.getSHA256(tbUserDto.getPwd()));
+        TbUser tbUser = userRepo.findByEmailAndPwd(tbUserDto.getEmail(), tbUserDto.getPwd())
+                .orElseThrow(() -> new CommonException("존재하지 않는 회원 pk입니다."));
+        return tbUser;
+    }
+
+    public TbUser signup(TbUserDto tbUserDto) {
+
         Optional<TbUser> tbUser = userRepo.findByEmail(tbUserDto.getEmail());
+
         tbUser.ifPresent(user -> {
             throw new CommonException("이미 존재하는 아이디 입니다.");
         });
-        return userRepo.saveUser(tbUserDto).getUserId();
+
+        //비밀번호 암호화
+        tbUserDto.setPwd(StringUtil.getSHA256(tbUserDto.getPwd()));
+
+        return userRepo.saveUser(tbUserDto);
     }
 }

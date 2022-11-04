@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 @EnableJpaAuditing
-@EntityScan(basePackages = {"com.module.domain"})
+@EntityScan(basePackages = {"com.module.db"})
 @EnableJpaRepositories(basePackages = {"com.module.domain.*.entityrepo"})
 public class ModuleProcessUserApplication {
 
