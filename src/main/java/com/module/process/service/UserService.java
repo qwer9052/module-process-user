@@ -3,8 +3,8 @@ package com.module.process.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.module.core.exception.CommonException;
 import com.module.core.util.StringUtil;
-import com.module.db.entity.user.TbUser;
-import com.module.domain.user.model.TbUserDto;
+import com.module.db.user.entity.TbUser;
+import com.module.db.user.model.TbUserDto;
 import com.module.domain.user.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class UserService {
     }
 
     public TbUser findById(Long userId) throws CommonException {
-        return userRepo.findById(userId).orElseThrow(() -> new CommonException("존재하지 않는 회원 pk입니다."));
+        return userRepo.findById(userId);
         //return mapper.convertValue(tbUser, TbUserDto.class);
     }
 

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(
         basePackages = {
                 "com.module.core",
-                "com.module.domain.user",
+                "com.module.domain",
         }
 )
 public class BasicConfiguration {
